@@ -14,7 +14,7 @@ const routes = [
         },
     },
     {
-        path: 'predict/history',
+        path: '/predict/history',
         method: 'GET',
         handler: handler.getHistory,
     }

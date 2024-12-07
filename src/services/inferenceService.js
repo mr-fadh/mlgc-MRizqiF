@@ -7,7 +7,7 @@ async function inferenceService(model, image) {
     }
 
     try {
-        const tensor = tf.node.decodeImage(image).resizeNearestNeighbor([224, 224]).toFloat().expandDims();
+        const tensor = tf.node.decodeImage(image).resizeNearestNeighbor([224, 224]).expandDims().toFloat();
 
         const prediction = await model.predict(tensor).data();
         const confidence = Math.max(...prediction) * 100;
@@ -20,8 +20,8 @@ async function inferenceService(model, image) {
         }
 
         if (confidence < 50) {
-            tag = "Non-Cancer";
-            recommendations = "Penyakit kanker tidak terdeteksi";
+            tag = "Non-cancer";
+            recommendations = "Penyakit kanker tidak terdeteksi.";
         }
 
         return{ tag, recommendations };

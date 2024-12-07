@@ -1,7 +1,7 @@
 const tf = require('@tensorflow/tfjs-node');
 
 async function loadModel() {
-    const model = await tf.loadLayersModel(process.env.MODEL_URL);
+    const model = await tf.loadGraphModel(process.env.MODEL_URL);
     return model;
 }
 

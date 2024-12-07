@@ -6,44 +6,50 @@ const loadModel = require("../services/loadModel");
 const InputError = require("../exceptions/InputError");
 
 (async () => {
-    const server = Hapi.server({
-        port: 3000,
-        host: "0.0.0.0",
-        routes: {
-            cors: {
-                origin: ["*"],
-            },
-        },
-    });
+  const server = Hapi.server({
+    port: 8080,
+    host: "0.0.0.0",
+    routes: {
+      cors: {
+        origin: ["*"],
+      },
+    },
+  });
 
-    const model = await loadModel();
-    server.app.model = model;
+  const model = await loadModel();
+  server.app.model = model;
 
-    server.route(routes);
+  server.route(routes);
 
-    server.ext("onPreResponse", (request, h) => {
-        const { response } = request;
-        if (response instanceof InputError) {
-            return h.response({
-                status: "fail",
-                message: response.message,
-            }).code(response.statusCode);
-        }
-        if (response.statusCode) {
-            return h.response.code(response.statusCode);
-        }
+  server.ext("onPreResponse", function (request, h) {
+    const response = request.response;
 
-        if(response.isBoom) {
-            const { output } = response;
-            return h.response({
-                status: "fail",
-                message: output.payload.message,
-            }).code(output.statusCode);
-        }
+    if (response instanceof InputError) {
+      const newResponse = h.response({
+        status: "fail",
+        message: response.message,
+      });
+      if (response.statusCode) {
+        newResponse.code(response.statusCode);
+        return newResponse;
+      }
 
-        return h.continue;
-    });
+      newResponse.code(response.output.statusCode);
+      return newResponse;
+    }
 
-    await server.start();
-    console.log(`Server berjalan pada ${server.info.uri}`);
+    if (response.isBoom) {
+      const newResponse = h.response({
+        status: "fail",
+        message: response.message,
+      });
+      newResponse.code(response.output.statusCode);
+      return newResponse;
+    }
+
+    return h.continue;
+  });
+
+  await server.start();
+  console.log(`Server start at: ${server.info.uri}`);
 })();

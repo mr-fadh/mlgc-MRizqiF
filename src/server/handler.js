@@ -24,7 +24,7 @@ async function postClassificationPredict(request, h) {
     return h.response({
         status: 'success',
         message: 'Model is predicted successfully',
-        data,
+        data: newData,
     }).code(201);
 }
 
